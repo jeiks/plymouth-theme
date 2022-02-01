@@ -1,9 +1,13 @@
 # Different Tux - Plymouth's Theme
 
-I am sharing here my own [Plymouth](https://www.freedesktop.org/wiki/Software/Plymouth/)'s theme, i.e., a theme that I generated to use in my Desktop.
+_[Plymouth](https://www.freedesktop.org/wiki/Software/Plymouth/) is an application that runs very early in the boot process (even before the root filesystem is mounted!) that provides a graphical boot animation while the boot process happens in the background._
 
-It was tested on Ubuntu 20.04.
+I am sharing my own Plymouth's theme. It was based on a older image that I always loved to use. I generated this theme to substitute my Kubuntu default theme. It was tested on KUbuntu 20.04.
+
+Here is the preview:
 ![different-tux-preview](theme-preview.png)
+
+This theme displays the system messages on a center box, which is also the place to receive password (for crypted devices).
 
 ## How to use it
 

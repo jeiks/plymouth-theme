@@ -1,0 +1,192 @@
+X_CENTER = Window.GetWidth() / 2;
+Y_CENTER = Window.GetHeight() / 2;
+
+status = "normal";
+
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
+
+/* Images */
+background.image = Image("images/background.png");
+box.image = Image("images/box.png");
+passwordField.image = Image("images/password-field.png");
+passwordDot.image = Image("images/password-dot.png");
+
+// The background is a old image that I like so much.
+// Unfortunately, I do not know the author.. if you know, please contact me.
+// Well.. the background size will not fit on every screen
+// So these functions will scale and center it
+// Other images also will be scaled using the background measures
+fun getScaledImage(image) {
+    ratio.w = Window.GetWidth() / background.image.GetWidth();
+    ratio.h = Window.GetHeight() / background.image.GetHeight();    
+    scaled = image.Scale(image.GetWidth() * ratio.w, image.GetHeight() * ratio.h);
+    return scaled;
+}
+
+fun newSprite(image, zIndex, opacity) {
+    if (Window.GetHeight() != image.GetHeight() || Window.GetWidth() != image.GetWidth())
+        image = getScaledImage(image);
+    
+    sprite = Sprite(image);
+    image_center_x = image.GetWidth() / 2;
+    image_center_y = image.GetHeight() / 2;
+    sprite.SetX(X_CENTER - image_center_x);
+    sprite.SetY(Y_CENTER - image_center_y);
+    sprite.SetZ(zIndex);
+    sprite.SetOpacity(opacity);
+    return sprite;
+}
+
+/* Sprites */
+background.zIndex = 1;
+box.zIndex = 2;
+passwordField.zIndex = 3;
+passwordDot.zIndex = 4;
+
+background.sprite    = newSprite(background.image,    background.zIndex,    1);
+box.sprite           = newSprite(box.image,           box.zIndex,           1);
+passwordField.sprite = newSprite(passwordField.image, passwordField.zIndex, 0);
+passwordDot.sprite   = newSprite(passwordDot.image,   passwordDot.zIndex,   0);
+
+/* -------------------------------- Message -------------------------------- */
+fun displayMessageCallback (text) {
+  prompt.image = Image.Text(text, 1, 1, 1);
+  prompt.sprite = Sprite(prompt.image);
+  prompt.sprite.SetX(box.sprite.getX() + 10);
+  prompt.sprite.setY(box.sprite.getY() + 10);
+  prompt.sprite.setZ(1000);
+  global.prompt = prompt;
+}
+
+Plymouth.SetMessageFunction(displayMessageCallback);
+
+/* ---------------------------- Scroll Messages ---------------------------- */
+fun getScaledPosition(x, y, orig_image, scaled_image) {
+    orig_width  = orig_image.GetWidth();
+    scal_width  = scaled_image.GetWidth();
+    orig_height = orig_image.GetHeight();
+    scal_height = scaled_image.GetHeight();
+    scaled_point.x = (x*scal_width) / orig_width;
+    scaled_point.y = (y*scal_height) / orig_height;
+    return scaled_point;
+}
+
+// target text:
+//     height: 140 to 300
+//     width: 140 to 520
+fun calcBoxArea() {
+    // get top_left and bottom_right of Scaled Box:
+    top_left     = getScaledPosition(140, 140, box.image, box.sprite.GetImage());
+    bottom_right = getScaledPosition(520, 300, box.image, box.sprite.GetImage());
+    // get character width and height. Also calculate the mean of a upper and a 3*lower character
+    aux_A  = Image.Text("A", 1, 1, 1);
+    aux_a  = Image.Text("a", 1, 1, 1);
+    aux.h  = aux_A.GetHeight();
+    aux.w  = aux_A.GetWidth();
+    aux.ww = (aux_A.GetWidth() + aux_a.GetWidth()*3) / 4;
+    // set the box's area specifications:
+    // aux.ww is used because I am considering upper and lower characters.
+    // But I know it can reach box limits. You can change it to aux.w to be sure
+    // the text will not overlay the box limits.
+    area.line_height      = aux.h;
+    area.max_line_width   = Math.Int((bottom_right.x - top_left.x) / aux.ww);
+    area.max_scroll_lines = Math.Int((bottom_right.y - top_left.y) / aux.h);
+    return area;
+}
+BOX_AREA = calcBoxArea();
+OFFSET = getScaledPosition(140, 140, box.image, box.sprite.GetImage());
+//creating message sprites
+for (i=0; i < BOX_AREA.max_scroll_lines; i++) {
+    lines[i] = Image.Text("", 1, 1, 1);
+    scroll_message_sprite[i] = Sprite();    
+    scroll_message_sprite[i].SetPosition(box.sprite.GetX() + OFFSET.x, (box.sprite.GetY() + OFFSET.y) + (BOX_AREA.line_height*i), 10);
+}
+
+// checking message size
+fun string_length(string) {
+    index = 0;
+    str = String(string);
+    while(str.CharAt(index)) index++;
+    return index;
+}
+
+fun scroll_message(text) {
+    /* Truncate log messages */
+    if (string_length(text) > BOX_AREA.max_line_width) {
+        text  = text.SubString(0, BOX_AREA.max_line_width - 3);
+        text += "...";
+    }
+    
+    /* Shift message one line up */
+    for (i=BOX_AREA.max_scroll_lines-1; i>0; i--) {
+        lines[i] = lines[i-1];
+    }
+    
+    /* Convert message to image */
+    lines[0] = Image.Text(text, 1, 1, 1);
+    
+    for (i=0; i<BOX_AREA.max_scroll_lines; i++) {
+        scroll_message_sprite[i].SetImage(lines[i]);
+    }
+}
+Plymouth.SetUpdateStatusFunction(scroll_message);
+
+/* ---------------------------- Password Dialog ---------------------------- */
+
+fun passwordDialogSetup () {
+  global.passwordField = passwordField;
+}
+
+fun setPasswordDialogOpacity (opacity) {
+  passwordField.sprite.SetOpacity(opacity);
+
+  for (i = 0; passwordField.bullets[i]; i++)
+    passwordField.bullets[i].sprite.SetOpacity(opacity);
+}
+
+fun passwordDialogCallback (prompt, bullets) {
+  global.status = "password";
+
+  if (!global.passwordField)
+    passwordDialogSetup();
+  else
+    setPasswordDialogOpacity(1);
+
+  displayMessageCallback(prompt);
+
+  passwordWidth = passwordField.sprite.GetImage().GetWidth();
+  bulletWidth = passwordDot.sprite.GetImage().GetWidth();
+  maxPasswordWidth = Math.Int(passwordWidth/bulletWidth)-1;
+  
+  passwordField.sprite.SetX(box.sprite.GetX() + OFFSET.x);
+  passwordField.sprite.SetY((box.sprite.GetY() + OFFSET.y) + (BOX_AREA.line_height * (BOX_AREA.max_scroll_lines)));
+  
+  for (i = 0; passwordField.bullets[i] || i < bullets && i < maxPasswordWidth; i++)
+  {
+    if (!passwordField.bullets[i])
+    {
+      passwordField.bullets[i].sprite = Sprite(passwordDot.image);
+      passwordField.bullets[i].sprite.SetX(passwordField.sprite.GetX() + bulletWidth*0.2 + (i+1)*bulletWidth);
+      passwordField.bullets[i].sprite.SetY(passwordField.sprite.GetY() + passwordField.sprite.GetImage().GetHeight()*0.3);
+      passwordField.bullets[i].sprite.SetZ(passwordField.sprite.GetZ());
+    }
+
+    if (i < bullets)
+      passwordField.bullets[i].sprite.SetOpacity(1);
+    else
+      passwordField.bullets[i].sprite.SetOpacity(0);
+  }
+}
+
+Plymouth.SetDisplayPasswordFunction(passwordDialogCallback);
+
+fun displayNormalLogoCallback () {
+  global.status = "normal";
+  if (global.passwordField)
+    setPasswordDialogOpacity(0);
+  prompt.SetOpacity(0);
+}
+
+Plymouth.SetDisplayNormalFunction(displayNormalLogoCallback);
+Plymouth.SetQuitFunction(displayNormalLogoCallback);

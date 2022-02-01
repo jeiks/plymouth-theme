@@ -1,0 +1,26 @@
+#!/bin/sh
+# postinst script for plymouth-jeiks-theme
+
+set -e
+
+case "$1" in
+    configure)
+        update-alternatives --install \
+            /usr/share/plymouth/themes/default.plymouth default.plymouth \
+            /usr/share/plymouth/themes/different-tux/different-tux.plymouth 200
+        update-initramfs -u
+    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+        update-alternatives --remove default.plymouth \
+            /usr/share/plymouth/themes/different-tux/different-tux.plymouth || true
+        update-initramfs -u
+    ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+exit 0

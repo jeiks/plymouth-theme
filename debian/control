@@ -1,0 +1,16 @@
+Source: plymouth-jeiks-theme
+Section: misc
+Priority: optional
+Maintainer: Jacson RC Silva <jacsonrcsilva@gmail.com>
+Build-Depends: debhelper-compat (= 12)
+Standards-Version: 4.4.1
+
+Package: plymouth-jeiks-theme
+Architecture: any
+Depends: plymouth, plymouth-label, ${shlibs:Depends}, ${misc:Depends}
+Description: Graphical boot animation and logger - Different Tux Theme
+ Plymouth is an application that runs very early in the boot process
+ (even before the root filesystem is mounted!) that provides a graphical
+ boot animation while the boot process happens in the background.
+ .
+ This package contains the Different Tux theme.

@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Different Tux Theme
+Description=For different people
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/different-tux
+ScriptFile=/usr/share/plymouth/themes/different-tux/different-tux.script

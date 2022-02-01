@@ -49,7 +49,7 @@ And to remove the package (and theme):
 sudo dpkg -r plymouth-jeiks-theme
 ```
 
-### Setting everything by hands (=D)
+### Or Setting everything up by hand (=D)
 
 You have to follow these steps (the explantion is on shell comments, i.e., lines starting with "#"):
 ```sh

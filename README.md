@@ -20,7 +20,7 @@ $ git clone https://github.com/jeiks/plymouth-theme.git
 $ cd plymouth-theme
 $ debuild -sa -d
 $ cd ..
-$ sudo dpkg -i plymouth-jeiks-theme_1.0-1_amd64.deb
+$ sudo dpkg -i plymouth-jeiks-theme_1.0.1_amd64.deb
 ```
 Installing this package (.deb file) is a good option, because the package will automatically set this theme as default and also update the initramfs file.
 

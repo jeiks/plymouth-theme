@@ -13,7 +13,7 @@ This theme displays system messages in a central box, which is also the place to
 
 ### Creating a deb package and installing it:
 ```sh
-$ sudo apt-get install git debian-builder debhelper-compat
+$ sudo apt-get install git build-essential debhelper devscripts
 $ mkdir ~/plymouth-theme
 $ cd ~/plymouth-theme
 $ git clone https://github.com/jeiks/plymouth-theme.git
